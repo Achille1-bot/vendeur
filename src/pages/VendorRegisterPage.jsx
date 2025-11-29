@@ -1,8 +1,19 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import emailjs from "emailjs-com";
+
 
 const ALL_CATEGORIES = ["Véhicules", "Nourriture", "Électronique", "Vêtements"];
-const PRIX_CATEGORIE = 2000;
+
+const COUNTRY_OPTIONS = [
+  { code: "TG", name: "Togo", dialCode: "+228" },
+  { code: "BJ", name: "Bénin", dialCode: "+229" },
+  { code: "CI", name: "Côte d’Ivoire", dialCode: "+225" },
+  { code: "GH", name: "Ghana", dialCode: "+233" },
+  { code: "SN", name: "Sénégal", dialCode: "+221" },
+  { code: "NG", name: "Nigéria", dialCode: "+234" },
+  { code: "CM", name: "Cameroun", dialCode: "+237" },
+];
 
 const inputStyle = {
   width: "100%",
@@ -20,16 +31,15 @@ export default function VendorRegisterPage() {
   const [formData, setFormData] = useState({
     nomComplet: "",
     email: "",
-    telephone: "",
     nomBoutique: "",
   });
+
+  const [phoneCountry, setPhoneCountry] = useState("TG");
+  const [phoneNumber, setPhoneNumber] = useState("");
+
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [error, setError] = useState("");
-
-  const totalMontant = useMemo(
-    () => selectedCategories.length * PRIX_CATEGORIE,
-    [selectedCategories]
-  );
+  const [sending, setSending] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,19 +58,38 @@ export default function VendorRegisterPage() {
     setSelectedCategories((prev) => prev.filter((c) => c !== category));
   };
 
-  const handleSubmit = (e) => {
+  const sendPasswordSetupEmail = async (payload) => {
+    // L’identifiant = email
+    const username = payload.email;
+    // Lien vers la page de définition du mot de passe (à créer côté frontend)
+    const passwordSetupLink = `${window.location.origin}/definir-mot-de-passe?email=${encodeURIComponent(
+      payload.email
+    )}`;
+
+    const emailParams = {
+      nomComplet: payload.nomComplet,
+      username: username,
+      boutique: payload.nomBoutique,
+      to_email: payload.email,
+      setPasswordLink: passwordSetupLink,
+    };
+
+    // 👉 Remplace par tes vrais identifiants EmailJS
+    return emailjs.send(
+      "SERVICE_ID", // à remplacer
+      "TEMPLATE_ID", // à remplacer
+      emailParams,
+      "PUBLIC_KEY" // à remplacer
+    );
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // 👉 Email devient obligatoire
-    if (
-      !formData.nomComplet ||
-      !formData.email ||
-      !formData.telephone ||
-      !formData.nomBoutique
-    ) {
+    if (!formData.nomComplet || !formData.email || !phoneNumber || !formData.nomBoutique) {
       setError(
-        "Merci de remplir tous les champs obligatoires : nom, email, téléphone et nom de la boutique."
+        "Merci de remplir tous les champs obligatoires : nom, email, pays + téléphone et nom de la boutique."
       );
       return;
     }
@@ -70,19 +99,33 @@ export default function VendorRegisterPage() {
       return;
     }
 
+    const country = COUNTRY_OPTIONS.find((c) => c.code === phoneCountry);
+    const fullPhone = country ? `${country.dialCode}${phoneNumber}` : phoneNumber;
+
     const payload = {
       ...formData,
+      telephone: fullPhone,
+      pays: country ? country.name : "",
       categories: selectedCategories,
-      total: totalMontant,
       createdAt: new Date().toISOString(),
     };
 
-    // Sauvegarde locale (tu pourras remplacer par Firestore / API)
+    // Sauvegarde locale (pour la page de paiement ou autre)
     localStorage.setItem("pendingVendor", JSON.stringify(payload));
 
-    // Ici tu pourras plus tard appeler ta fonction d'envoi d'email
-    // ex: await sendEmailToVendor(payload);
+    // Envoi de l’email de set password
+    try {
+      setSending(true);
+      await sendPasswordSetupEmail(payload);
+      console.log("Email de set password envoyé au vendeur.");
+    } catch (err) {
+      console.error("Erreur lors de l’envoi de l’email :", err);
+      // Tu peux afficher un message si tu veux
+    } finally {
+      setSending(false);
+    }
 
+    // Redirection vers la page de paiement
     navigate("/paiement-vendeur");
   };
 
@@ -124,8 +167,8 @@ export default function VendorRegisterPage() {
                 marginBottom: "4px",
               }}
             >
+              Étape 1 · Inscription vendeur
             </div>
-            <center>
             <h1
               style={{
                 fontSize: "24px",
@@ -136,7 +179,10 @@ export default function VendorRegisterPage() {
             >
               Devenir vendeur sur la plateforme
             </h1>
-            </center>
+            <p style={{ fontSize: "14px", color: "#6b7280" }}>
+              Créez votre profil vendeur, choisissez vos catégories, puis vous
+              recevrez un email pour définir votre mot de passe.
+            </p>
           </div>
 
           {error && (
@@ -155,10 +201,7 @@ export default function VendorRegisterPage() {
             </div>
           )}
 
-          <form
-            onSubmit={handleSubmit}
-            style={{ display: "grid", gap: "12px" }}
-          >
+          <form onSubmit={handleSubmit} style={{ display: "grid", gap: "12px" }}>
             <div style={{ display: "grid", gap: "10px" }}>
               <div>
                 <label
@@ -192,7 +235,7 @@ export default function VendorRegisterPage() {
                     color: "#111827",
                   }}
                 >
-                  Email*
+                  Email (identifiant)* 
                 </label>
                 <input
                   type="email"
@@ -204,6 +247,7 @@ export default function VendorRegisterPage() {
                 />
               </div>
 
+              {/* Pays + téléphone */}
               <div>
                 <label
                   style={{
@@ -214,16 +258,58 @@ export default function VendorRegisterPage() {
                     color: "#111827",
                   }}
                 >
-                  Téléphone / WhatsApp*
+                  Pays & téléphone / WhatsApp*
                 </label>
-                <input
-                  type="tel"
-                  name="telephone"
-                  value={formData.telephone}
-                  onChange={handleChange}
-                  placeholder="Ex: +228 90 00 00 00"
-                  style={inputStyle}
-                />
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "8px",
+                    alignItems: "center",
+                  }}
+                >
+                  <select
+                    value={phoneCountry}
+                    onChange={(e) => setPhoneCountry(e.target.value)}
+                    style={{
+                      ...inputStyle,
+                      width: "45%",
+                      paddingRight: "28px",
+                    }}
+                  >
+                    {COUNTRY_OPTIONS.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.name} ({c.dialCode})
+                      </option>
+                    ))}
+                  </select>
+                  <div style={{ position: "relative", width: "55%" }}>
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: "10px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        fontSize: "13px",
+                        color: "#6b7280",
+                      }}
+                    >
+                      {
+                        COUNTRY_OPTIONS.find((c) => c.code === phoneCountry)
+                          ?.dialCode
+                      }
+                    </div>
+                    <input
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      placeholder="90 00 00 00"
+                      style={{
+                        ...inputStyle,
+                        paddingLeft: "80px",
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -263,8 +349,8 @@ export default function VendorRegisterPage() {
                 Catégories d’articles à vendre*
               </label>
               <p style={{ fontSize: "12px", color: "#6b7280", marginBottom: 8 }}>
-                Sélectionnez une ou plusieurs catégories. Chaque catégorie est
-                facturée <strong>2 000 FCFA</strong>.
+                Sélectionnez une ou plusieurs catégories correspondant à vos
+                produits.
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {ALL_CATEGORIES.map((category) => {
@@ -349,27 +435,29 @@ export default function VendorRegisterPage() {
             {/* Bouton submit */}
             <button
               type="submit"
+              disabled={sending}
               style={{
                 marginTop: "16px",
                 width: "100%",
                 padding: "11px 16px",
                 borderRadius: "999px",
                 border: "none",
-                background:
-                  "linear-gradient(135deg, #4f46e5 0%, #6366f1 40%, #22c55e 100%)",
+                background: sending
+                  ? "#9ca3af"
+                  : "linear-gradient(135deg, #4f46e5 0%, #6366f1 40%, #22c55e 100%)",
                 color: "#ffffff",
                 fontSize: "15px",
                 fontWeight: 600,
-                cursor: "pointer",
+                cursor: sending ? "not-allowed" : "pointer",
                 boxShadow: "0 10px 25px rgba(79,70,229,0.35)",
               }}
             >
-              Valider mon inscription
+              {sending ? "Envoi de l’email..." : "Valider mon inscription"}
             </button>
           </form>
         </div>
 
-        {/* Colonne droite : résumé & tarif */}
+        {/* Colonne droite : infos connexion */}
         <div
           style={{
             paddingLeft: "20px",
@@ -388,10 +476,11 @@ export default function VendorRegisterPage() {
                 marginBottom: "6px",
               }}
             >
-              Résumé de votre abonnement
+              Informations de connexion
             </h2>
             <p style={{ fontSize: "13px", color: "#6b7280", marginBottom: 12 }}>
-              Le montant total dépend du nombre de catégories que vous choisissez.
+              Votre <strong>email</strong> servira d’identifiant (nom
+              d’utilisateur) pour accéder à votre espace vendeur.
             </p>
 
             <div
@@ -404,61 +493,19 @@ export default function VendorRegisterPage() {
                 gap: "8px",
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: "13px",
-                }}
-              >
-                <span>Catégories sélectionnées</span>
-                <span style={{ fontWeight: 600 }}>
-                  {selectedCategories.length}{" "}
-                  {selectedCategories.length <= 1
-                    ? "catégorie"
-                    : "catégories"}
+              <div style={{ fontSize: "13px" }}>
+                <span style={{ color: "#6b7280" }}>Identifiant (email) :</span>
+                <br />
+                <span style={{ fontWeight: 600, color: "#111827" }}>
+                  {formData.email || "— en attente de saisie —"}
                 </span>
               </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: "13px",
-                }}
-              >
-                <span>Prix par catégorie</span>
-                <span>2 000 FCFA</span>
-              </div>
-
-              <div
-                style={{
-                  marginTop: "4px",
-                  borderTop: "1px dashed #e5e7eb",
-                  paddingTop: "8px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    color: "#111827",
-                  }}
-                >
-                  Montant total
-                </span>
-                <span
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: 700,
-                    color: "#16a34a",
-                  }}
-                >
-                  {totalMontant.toLocaleString("fr-FR")} FCFA
-                </span>
+              <div style={{ fontSize: "13px", color: "#6b7280" }}>
+                Après validation, vous recevrez un email contenant :
+                <ul style={{ marginTop: 4, paddingLeft: 18 }}>
+                  <li>Votre identifiant (email)</li>
+                  <li>Un lien sécurisé pour définir votre mot de passe</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -473,9 +520,8 @@ export default function VendorRegisterPage() {
               border: "1px solid #facc15",
             }}
           >
-            ⚠️ Après validation, vous serez redirigé vers la page de paiement de
-            votre abonnement vendeur et un récapitulatif sera envoyé à votre
-            adresse email.
+            💡 Gardez votre email accessible : vous en aurez besoin pour valider
+            votre compte vendeur et créer votre mot de passe.
           </div>
         </div>
       </div>
