@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import emailjs from "emailjs-com";
-
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+// ⚠️ Si tu utilises encore emailjs ici, garde l'import, sinon tu peux le retirer
+// import emailjs from "emailjs-com";
 
 const ALL_CATEGORIES = ["Véhicules", "Nourriture", "Électronique", "Vêtements"];
 
@@ -27,6 +27,8 @@ const inputStyle = {
 
 export default function VendorRegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+
 
   const [formData, setFormData] = useState({
     nomComplet: "",
@@ -36,10 +38,76 @@ export default function VendorRegisterPage() {
 
   const [phoneCountry, setPhoneCountry] = useState("TG");
   const [phoneNumber, setPhoneNumber] = useState("");
-
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
+
+  // ✅ état de validité du formulaire (pour griser le bouton)
+  const isFormValid =
+    formData.nomComplet.trim() !== "" &&
+    formData.email.trim() !== "" &&
+    formData.nomBoutique.trim() !== "" &&
+    phoneNumber.trim() !== "" &&
+    selectedCategories.length > 0;
+
+  // 🔁 1. AU MONTAGE : on récupère les infos déjà enregistrées
+  useEffect(() => {
+  // ✅ On ne pré-remplit que si on vient de la page récap via "Modifier"
+  const fromRecap = location.state?.fromRecap;
+
+  if (!fromRecap) {
+    // visite normale : on reset tout
+    setFormData({
+      nomComplet: "",
+      email: "",
+      nomBoutique: "",
+    });
+    setPhoneCountry("TG");
+    setPhoneNumber("");
+    setSelectedCategories([]);
+    return;
+  }
+
+  // Ici : on vient du bouton "Modifier" => on relit pendingVendor
+  const data = localStorage.getItem("pendingVendor");
+  if (!data) return;
+
+  try {
+    const v = JSON.parse(data);
+
+    // champs texte
+    setFormData({
+      nomComplet: v.nomComplet || "",
+      email: v.email || "",
+      nomBoutique: v.nomBoutique || "",
+    });
+
+    // pays + téléphone
+    if (v.pays) {
+      const country = COUNTRY_OPTIONS.find((c) => c.name === v.pays);
+      if (country) {
+        setPhoneCountry(country.code);
+
+        if (v.telephone && v.telephone.startsWith(country.dialCode)) {
+          setPhoneNumber(v.telephone.slice(country.dialCode.length));
+        } else if (v.telephone) {
+          setPhoneNumber(v.telephone);
+        }
+      } else if (v.telephone) {
+        setPhoneNumber(v.telephone);
+      }
+    } else if (v.telephone) {
+      setPhoneNumber(v.telephone);
+    }
+
+    // catégories
+    if (Array.isArray(v.categories)) {
+      setSelectedCategories(v.categories);
+    }
+  } catch (e) {
+    console.error("Erreur parsing pendingVendor:", e);
+  }
+}, [location.state]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,36 +126,17 @@ export default function VendorRegisterPage() {
     setSelectedCategories((prev) => prev.filter((c) => c !== category));
   };
 
-  const sendPasswordSetupEmail = async (payload) => {
-    // L’identifiant = email
-    const username = payload.email;
-    // Lien vers la page de définition du mot de passe (à créer côté frontend)
-    const passwordSetupLink = `${window.location.origin}/definir-mot-de-passe?email=${encodeURIComponent(
-      payload.email
-    )}`;
-
-    const emailParams = {
-      nomComplet: payload.nomComplet,
-      username: username,
-      boutique: payload.nomBoutique,
-      to_email: payload.email,
-      setPasswordLink: passwordSetupLink,
-    };
-
-    // 👉 Remplace par tes vrais identifiants EmailJS
-    return emailjs.send(
-      "SERVICE_ID", // à remplacer
-      "TEMPLATE_ID", // à remplacer
-      emailParams,
-      "PUBLIC_KEY" // à remplacer
-    );
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!formData.nomComplet || !formData.email || !phoneNumber || !formData.nomBoutique) {
+    // 🔒 On garde aussi la validation côté JS (sécurité)
+    if (
+      !formData.nomComplet ||
+      !formData.email ||
+      !phoneNumber ||
+      !formData.nomBoutique
+    ) {
       setError(
         "Merci de remplir tous les champs obligatoires : nom, email, pays + téléphone et nom de la boutique."
       );
@@ -110,22 +159,15 @@ export default function VendorRegisterPage() {
       createdAt: new Date().toISOString(),
     };
 
-    // Sauvegarde locale (pour la page de paiement ou autre)
+    // 🔐 2. ON SAUVEGARDE dans localStorage pour pouvoir revenir ensuite
     localStorage.setItem("pendingVendor", JSON.stringify(payload));
 
-    // Envoi de l’email de set password
-    try {
-      setSending(true);
-      await sendPasswordSetupEmail(payload);
-      console.log("Email de set password envoyé au vendeur.");
-    } catch (err) {
-      console.error("Erreur lors de l’envoi de l’email :", err);
-      // Tu peux afficher un message si tu veux
-    } finally {
-      setSending(false);
-    }
+    setSending(true);
 
-    // Redirection vers la page de paiement
+    // 👉 ICI tu peux envoyer un mail si tu veux ou juste passer à la page récap
+    setSending(false);
+
+    // redirection vers la page de récap / paiement
     navigate("/paiement-vendeur");
   };
 
@@ -177,11 +219,11 @@ export default function VendorRegisterPage() {
                 marginBottom: "4px",
               }}
             >
-              Devenir vendeur sur la plateforme
+              Devenir vendeur sur GoShop
             </h1>
             <p style={{ fontSize: "14px", color: "#6b7280" }}>
               Créez votre profil vendeur, choisissez vos catégories, puis vous
-              recevrez un email pour définir votre mot de passe.
+              verrez le récapitulatif de vos informations.
             </p>
           </div>
 
@@ -235,7 +277,7 @@ export default function VendorRegisterPage() {
                     color: "#111827",
                   }}
                 >
-                  Email (identifiant)* 
+                  Email (identifiant)*
                 </label>
                 <input
                   type="email"
@@ -435,24 +477,29 @@ export default function VendorRegisterPage() {
             {/* Bouton submit */}
             <button
               type="submit"
-              disabled={sending}
+              disabled={sending || !isFormValid}
               style={{
                 marginTop: "16px",
                 width: "100%",
                 padding: "11px 16px",
                 borderRadius: "999px",
                 border: "none",
-                background: sending
-                  ? "#9ca3af"
-                  : "linear-gradient(135deg, #4f46e5 0%, #6366f1 40%, #22c55e 100%)",
+                background:
+                  !isFormValid || sending
+                    ? "#9ca3af"
+                    : "linear-gradient(135deg, #4f46e5 0%, #6366f1 40%, #22c55e 100%)",
                 color: "#ffffff",
                 fontSize: "15px",
                 fontWeight: 600,
-                cursor: sending ? "not-allowed" : "pointer",
-                boxShadow: "0 10px 25px rgba(79,70,229,0.35)",
+                cursor:
+                  !isFormValid || sending ? "not-allowed" : "pointer",
+                boxShadow:
+                  !isFormValid || sending
+                    ? "none"
+                    : "0 10px 25px rgba(79,70,229,0.35)",
               }}
             >
-              {sending ? "Envoi de l’email..." : "Valider mon inscription"}
+              {sending ? "Traitement..." : "Valider mes informations"}
             </button>
           </form>
         </div>
@@ -500,13 +547,6 @@ export default function VendorRegisterPage() {
                   {formData.email || "— en attente de saisie —"}
                 </span>
               </div>
-              <div style={{ fontSize: "13px", color: "#6b7280" }}>
-                Après validation, vous recevrez un email contenant :
-                <ul style={{ marginTop: 4, paddingLeft: 18 }}>
-                  <li>Votre identifiant (email)</li>
-                  <li>Un lien sécurisé pour définir votre mot de passe</li>
-                </ul>
-              </div>
             </div>
           </div>
 
@@ -520,8 +560,8 @@ export default function VendorRegisterPage() {
               border: "1px solid #facc15",
             }}
           >
-            💡 Gardez votre email accessible : vous en aurez besoin pour valider
-            votre compte vendeur et créer votre mot de passe.
+            💡 Après validation, vous pourrez confirmer vos informations et
+            recevoir un email récapitulatif.
           </div>
         </div>
       </div>

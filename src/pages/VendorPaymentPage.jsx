@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import emailjs from "emailjs-com";
 
 export default function VendorPaymentPage() {
@@ -6,6 +7,8 @@ export default function VendorPaymentPage() {
   const [sending, setSending] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [validated, setValidated] = useState(false); // 👈 après confirmation OK
+  const navigate = useNavigate();
 
   useEffect(() => {
     const data = localStorage.getItem("pendingVendor");
@@ -13,6 +16,12 @@ export default function VendorPaymentPage() {
       setVendor(JSON.parse(data));
     }
   }, []);
+
+  const handleModify = () => {
+  // on passe un petit "state" pour dire qu'on vient de la page récap
+  navigate("/", { state: { fromRecap: true } }); 
+  // adapte "/" si ta route du formulaire est différente
+}
 
   const handleConfirm = async () => {
     if (!vendor || !vendor.email) {
@@ -24,9 +33,8 @@ export default function VendorPaymentPage() {
     setSuccessMsg("");
     setErrorMsg("");
 
-    const statut = "En attente";
+    const statut = "En attente de validation";
 
-    // 🔥 Paramètres envoyés à EmailJS
     const emailParams = {
       to_email: vendor.email,
       nomComplet: vendor.nomComplet,
@@ -35,20 +43,25 @@ export default function VendorPaymentPage() {
       categories: vendor.categories?.join(", ") || "",
       statut,
     };
+console.log("🟢 emailParams envoyés à EmailJS =>", emailParams);
 
+  setSending(true);
+  setSuccessMsg("");
+  setErrorMsg("");
     try {
-      await emailjs.send(
-        "service_9zjx4sv",   // ⬅️ tu remplaces
-        "template_0wmrf04",  // ⬅️ tu remplaces
+      const res = await emailjs.send(
+        "service_9zjx4sv",    // ⬅️ à remplacer
+        "template_0wmrf04",   // ⬅️ à remplacer
         emailParams,
-        "7IPz1d_dgErJ354ny"    // ⬅️ tu remplaces
+        "7IPz1d_dgErJ354ny"     // ⬅️ à remplacer
       );
-
+       console.log("✅ Réponse EmailJS :", res);
       setSuccessMsg(
-        "Le récapitulatif a été envoyé au vendeur avec le statut : en attente."
+        "Votre demande a été confirmée. Un email récapitulatif vous a été envoyé avec le statut « En attente de validation »."
       );
+      setValidated(true); // 👈 on cache les boutons après succès
     } catch (err) {
-      console.error("Erreur envoi email paiement:", err.text);
+      console.error("Erreur envoi email paiement:", err);
       setErrorMsg(
         "Une erreur est survenue lors de l’envoi de l’email. Veuillez réessayer."
       );
@@ -60,7 +73,7 @@ export default function VendorPaymentPage() {
   if (!vendor) {
     return (
       <div style={{ padding: 20 }}>
-        <h1>Paiement vendeur</h1>
+        <h1>Récapitulatif vendeur</h1>
         <p>Aucune inscription vendeur trouvée. Retournez au formulaire.</p>
       </div>
     );
@@ -94,7 +107,7 @@ export default function VendorPaymentPage() {
             marginBottom: "8px",
           }}
         >
-          Paiement de votre abonnement vendeur
+          Voici le récapitulatif de vos informations
         </h1>
 
         <p style={{ marginBottom: "8px" }}>
@@ -112,21 +125,23 @@ export default function VendorPaymentPage() {
         </p>
 
         <p style={{ marginBottom: "16px" }}>
-          Ici, vous pouvez intégrer votre module de paiement (Mobile Money,
-          PayGate, Stripe, etc.). Pour cet exemple, le bouton ci-dessous confirme
-          la demande et envoie un email récapitulatif au vendeur avec le statut{" "}
-          <strong>“En attente”</strong>.
+          Vérifiez attentivement vos informations.  
+          Si vous souhaitez corriger un élément, cliquez sur{" "}
+          <strong>Modifier</strong>.  
+          Si tout est correct, cliquez sur <strong>Confirmer</strong> pour
+          envoyer votre demande. Vous recevrez un email récapitulatif.
         </p>
 
+        {/* Bulle de succès */}
         {successMsg && (
           <div
             style={{
               background: "#ecfdf5",
               color: "#166534",
               borderRadius: "10px",
-              padding: "8px 10px",
+              padding: "10px 12px",
               fontSize: "13px",
-              marginBottom: "10px",
+              marginBottom: "12px",
               border: "1px solid #bbf7d0",
             }}
           >
@@ -134,15 +149,16 @@ export default function VendorPaymentPage() {
           </div>
         )}
 
+        {/* Bulle d’erreur */}
         {errorMsg && (
           <div
             style={{
               background: "#fef2f2",
               color: "#b91c1c",
               borderRadius: "10px",
-              padding: "8px 10px",
+              padding: "10px 12px",
               fontSize: "13px",
-              marginBottom: "10px",
+              marginBottom: "12px",
               border: "1px solid #fecaca",
             }}
           >
@@ -150,24 +166,56 @@ export default function VendorPaymentPage() {
           </div>
         )}
 
-        <button
-          onClick={handleConfirm}
-          disabled={sending}
-          style={{
-            marginTop: "8px",
-            width: "100%",
-            padding: "10px 16px",
-            borderRadius: "999px",
-            border: "none",
-            background: sending ? "#9ca3af" : "#16a34a",
-            color: "#ffffff",
-            fontSize: "16px",
-            fontWeight: "600",
-            cursor: sending ? "not-allowed" : "pointer",
-          }}
-        >
-          {sending ? "Envoi du mail..." : "Confirmer"}
-        </button>
+        {/* Boutons : visibles uniquement tant que la demande n’est pas validée */}
+        {!validated && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "10px",
+              marginTop: "8px",
+            }}
+          >
+            <button
+              onClick={handleConfirm}
+              disabled={sending}
+              style={{
+                flex: 1,
+                minWidth: "140px",
+                padding: "10px 16px",
+                borderRadius: "999px",
+                border: "none",
+                background: sending ? "#9ca3af" : "#16a34a",
+                color: "#ffffff",
+                fontSize: "16px",
+                fontWeight: "600",
+                cursor: sending ? "not-allowed" : "pointer",
+              }}
+            >
+              {sending ? "Envoi en cours..." : "Confirmer"}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleModify}
+              disabled={sending}
+              style={{
+                flex: 1,
+                minWidth: "140px",
+                padding: "10px 16px",
+                borderRadius: "999px",
+                border: "1px solid #16a34a",
+                background: "#ffffff",
+                color: "#16a34a",
+                fontSize: "16px",
+                fontWeight: "600",
+                cursor: sending ? "not-allowed" : "pointer",
+              }}
+            >
+              Modifier
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
