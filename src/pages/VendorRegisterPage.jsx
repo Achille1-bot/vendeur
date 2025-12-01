@@ -198,34 +198,66 @@ export default function VendorRegisterPage() {
       >
         {/* Colonne gauche : formulaire */}
         <div style={{ borderRight: "1px solid #f4f4f5", paddingRight: "20px" }}>
+          <button
+      type="button"
+      onClick={() => navigate("/")}
+      style={{
+        marginBottom: "12px",
+        padding: "6px 12px",
+        borderRadius: "999px",
+        border: "1px solid #e5e7eb",
+        background: "#f9fafb",
+        fontSize: "12px",
+        color: "#374151",
+        cursor: "pointer",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "6px",
+      }}
+    >
+      <span style={{ fontSize: "14px" }}>←</span>
+      Retour
+    </button>
           <div style={{ marginBottom: "18px" }}>
-            <div
-              style={{
-                fontSize: "12px",
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                color: "#6366f1",
-                fontWeight: 600,
-                marginBottom: "4px",
-              }}
-            >
-              Étape 1 · Inscription vendeur
-            </div>
-            <h1
-              style={{
-                fontSize: "24px",
-                fontWeight: 700,
-                color: "#0f172a",
-                marginBottom: "4px",
-              }}
-            >
-              Devenir vendeur sur GoShop
-            </h1>
-            <p style={{ fontSize: "14px", color: "#6b7280" }}>
-              Créez votre profil vendeur, choisissez vos catégories, puis vous
-              verrez le récapitulatif de vos informations.
-            </p>
-          </div>
+  {/* Ligne titre + bouton retour */}
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "10px",
+      gap: "13px",
+    }}
+  >
+    <div
+      style={{
+        fontSize: "12px",
+        textTransform: "uppercase",
+        letterSpacing: "0.08em",
+        color: "#6366f1",
+        fontWeight: 600,
+      }}
+    >
+    Inscris toi en tant vendeur
+    </div>
+  </div>
+
+  <h1
+    style={{
+      fontSize: "24px",
+      fontWeight: 700,
+      color: "#0f172a",
+      marginBottom: "4px",
+    }}
+  >
+    Devenir vendeur sur GoShop
+  </h1>
+  <p style={{ fontSize: "14px", color: "#6b7280" }}>
+    Créez votre profil vendeur, choisissez vos catégories, puis vous
+    verrez le récapitulatif de vos informations.
+  </p>
+</div>
+
 
           {error && (
             <div
@@ -289,72 +321,87 @@ export default function VendorRegisterPage() {
                 />
               </div>
 
-              {/* Pays + téléphone */}
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "13px",
-                    fontWeight: 500,
-                    marginBottom: "4px",
-                    color: "#111827",
-                  }}
-                >
-                  Pays & téléphone / WhatsApp*
-                </label>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "8px",
-                    alignItems: "center",
-                  }}
-                >
-                  <select
-                    value={phoneCountry}
-                    onChange={(e) => setPhoneCountry(e.target.value)}
-                    style={{
-                      ...inputStyle,
-                      width: "45%",
-                      paddingRight: "28px",
-                    }}
-                  >
-                    {COUNTRY_OPTIONS.map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.name} ({c.dialCode})
-                      </option>
-                    ))}
-                  </select>
-                  <div style={{ position: "relative", width: "55%" }}>
-                    <div
-                      style={{
-                        position: "absolute",
-                        left: "10px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        fontSize: "13px",
-                        color: "#6b7280",
-                      }}
-                    >
-                      {
-                        COUNTRY_OPTIONS.find((c) => c.code === phoneCountry)
-                          ?.dialCode
-                      }
-                    </div>
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      placeholder="90 00 00 00"
-                      style={{
-                        ...inputStyle,
-                        paddingLeft: "80px",
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
+   {/* Pays + téléphone / WhatsApp* */}
+<div>
+  <label
+    style={{
+      display: "block",
+      fontSize: "13px",
+      fontWeight: 500,
+      marginBottom: "4px",
+      color: "#111827",
+    }}
+  >
+    Pays & téléphone / WhatsApp*
+  </label>
 
-              <div>
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "minmax(0, 2fr) minmax(0, 3fr)", // 2/5 + 3/5
+      gap: "8px",
+      alignItems: "center",
+      width: "100%",
+    }}
+  >
+    {/* Sélecteur de pays */}
+      <select
+        value={phoneCountry}
+        onChange={(e) => setPhoneCountry(e.target.value)}
+        style={{
+          ...inputStyle,
+          width: "100%",
+        }}
+      >
+        {COUNTRY_OPTIONS.map((c) => (
+          <option key={c.code} value={c.code}>
+            {c.name} ({c.dialCode})
+          </option>
+        ))}
+      </select>
+
+   {/* Champ numéro avec indicatif intégré */}
+    <div
+      style={{
+        width: "100%",
+        borderRadius: "10px",
+        border: "1px solid #e4e4e7",
+        padding: "0 12px",
+        display: "flex",
+        alignItems: "center",
+        background: "#ffffff",
+        boxSizing: "border-box",
+        height: "40px", // ajuste si tu veux
+      }}
+    >
+      <span
+        style={{
+          fontSize: "13px",
+          color: "#6b7280",
+          marginRight: "8px",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {COUNTRY_OPTIONS.find((c) => c.code === phoneCountry)?.dialCode}
+      </span>
+      <input
+        type="tel"
+        value={phoneNumber}
+        onChange={(e) => setPhoneNumber(e.target.value)}
+        placeholder=""
+        style={{
+          border: "none",
+          outline: "none",
+          fontSize: "14px",
+          width: "100%",
+          background: "transparent",
+        }}
+      />
+    </div>
+  </div>
+</div>
+
+          <div>
                 <label
                   style={{
                     display: "block",

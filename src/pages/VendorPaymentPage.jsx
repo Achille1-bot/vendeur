@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import emailjs from "emailjs-com";
 
 export default function VendorPaymentPage() {
@@ -17,11 +17,11 @@ export default function VendorPaymentPage() {
     }
   }, []);
 
-  const handleModify = () => {
-  // on passe un petit "state" pour dire qu'on vient de la page récap
-  navigate("/", { state: { fromRecap: true } }); 
-  // adapte "/" si ta route du formulaire est différente
-}
+ const handleModify = () => {
+  // 👉 On renvoie vers la page d'inscription vendeur
+  //   en indiquant qu'on vient du récap (fromRecap: true)
+  navigate("/inscription-vendeur", { state: { fromRecap: true } });
+};
 
   const handleConfirm = async () => {
     if (!vendor || !vendor.email) {
@@ -198,7 +198,6 @@ console.log("🟢 emailParams envoyés à EmailJS =>", emailParams);
             <button
               type="button"
               onClick={handleModify}
-              disabled={sending}
               style={{
                 flex: 1,
                 minWidth: "140px",
