@@ -1,0 +1,24 @@
+:root{
+  /* Walmart minimal */
+  --primary:#0071CE;
+  --primary-600:#0060ad;
+  --accent:#FFC220;
+
+  /* Light élégant */
+  --bg:#ffffff;        /* fond page */
+  --surface:#ffffff;   /* cartes */
+  --surface-2:#ffffff; /* nav/hero */
+  --line:#e5e7eb;      /* séparateurs */
+  --text:#111827;      /* texte principal */
+  --muted:#6b7280;     /* texte secondaire */
+  --wm-font: "Bogle", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --wm-text: #2e2f32;
+  --wm-blue: #0071ce;
+  --wm-yellow: #ffc220;
+}
+body{
+  margin:0;
+  background:var(--bg);
+  font-family: var(--wm-font);
+  color: var(--wm-text);
+}
