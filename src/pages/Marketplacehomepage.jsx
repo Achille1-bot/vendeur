@@ -1,5 +1,5 @@
 // src/pages/MarketplaceHomePage.jsx
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 const SERVICE_CARDS = [
@@ -8,7 +8,6 @@ const SERVICE_CARDS = [
     title: "Choisissez parmi nos options de livraison",
     text: "Sous-traitez une partie de votre logistique à GoShop et profitez d’une solution adaptée aux vendeurs de toutes tailles.",
     linkLabel: "Découvrir nos solutions logistiques",
-    // 🔁 Mets ici l’URL de TON image
     imageUrl: "/images/services-logistique.jpg",
   },
   {
@@ -70,6 +69,8 @@ const SUBSCRIPTIONS = [
 ];
 
 export default function MarketplaceHomePage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const joinButtonStyle = {
     display: "inline-flex",
     alignItems: "center",
@@ -102,139 +103,68 @@ export default function MarketplaceHomePage() {
         background: "#f3f4f6",
       }}
     >
-      {/* NAVBAR TYPE WALMART */}
-      <header
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 50,
-          background: "#ffffff",
-          borderBottom: "1px solid #e5e7eb",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1120px",
-            margin: "0 auto",
-            padding: "10px 16px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "16px",
-          }}
-        >
+      {/* NAVBAR TYPE WALMART – RESPONSIVE */}
+      <header className="mk-header">
+        <div className="mk-header-inner">
           {/* Logo + titre */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              minWidth: 0,
-            }}
-          >
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: "12px",
-                background:
-                  "linear-gradient(135deg,#16a34a 0%,#22c55e 40%,#4ade80 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#ffffff",
-                fontWeight: 800,
-                fontSize: 18,
-              }}
-            >
-              G
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                lineHeight: 1.2,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 15,
-                  fontWeight: 700,
-                  color: "#111827",
-                }}
-              >
-                GoShop Marketplace
-              </span>
-              <span
-                style={{
-                  fontSize: 11,
-                  color: "#6b7280",
-                }}
-              >
+          <div className="mk-logo-block">
+            <div className="mk-logo-icon">G</div>
+            <div className="mk-logo-text">
+              <span className="mk-logo-title">GoShop Marketplace</span>
+              <span className="mk-logo-sub">
                 Plateforme vendeurs · Afrique de l’Ouest
               </span>
             </div>
           </div>
 
+          {/* Bouton burger (mobile) */}
+          <button
+            type="button"
+            className="mk-burger"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            aria-label="Ouvrir le menu"
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+
           {/* Liens du menu */}
           <nav
-            style={{
-              flex: 1,
-              display: "flex",
-              justifyContent: "center",
-              gap: 18,
-              fontSize: 14,
-              color: "#4b5563",
-            }}
+            className={`mk-nav ${mobileMenuOpen ? "is-open" : ""}`}
           >
             <button
               type="button"
-              onClick={() => scrollToId("pourquoi")}
-              style={{
-                border: "none",
-                background: "transparent",
-                padding: 0,
-                cursor: "pointer",
-                color: "#4b5563",
+              onClick={() => {
+                scrollToId("pourquoi");
+                setMobileMenuOpen(false);
               }}
             >
               Pourquoi GoShop
             </button>
             <button
               type="button"
-              onClick={() => scrollToId("fonctionnement")}
-              style={{
-                border: "none",
-                background: "transparent",
-                padding: 0,
-                cursor: "pointer",
-                color: "#4b5563",
+              onClick={() => {
+                scrollToId("fonctionnement");
+                setMobileMenuOpen(false);
               }}
             >
               Comment ça marche
             </button>
             <button
               type="button"
-              onClick={() => scrollToId("offres")}
-              style={{
-                border: "none",
-                background: "transparent",
-                padding: 0,
-                cursor: "pointer",
-                color: "#4b5563",
+              onClick={() => {
+                scrollToId("offres");
+                setMobileMenuOpen(false);
               }}
             >
               Avantages vendeurs
             </button>
             <button
               type="button"
-              onClick={() => scrollToId("faq")}
-              style={{
-                border: "none",
-                background: "transparent",
-                padding: 0,
-                cursor: "pointer",
-                color: "#4b5563",
+              onClick={() => {
+                scrollToId("faq");
+                setMobileMenuOpen(false);
               }}
             >
               FAQ
@@ -242,22 +172,8 @@ export default function MarketplaceHomePage() {
           </nav>
 
           {/* Actions à droite */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            <a
-              href="#"
-              style={{
-                fontSize: 13,
-                color: "#4b5563",
-                textDecoration: "none",
-                whiteSpace: "nowrap",
-              }}
-            >
+          <div className="mk-actions">
+            <a href="#" className="mk-link-login">
               Connexion vendeur
             </a>
 
@@ -368,7 +284,6 @@ export default function MarketplaceHomePage() {
                   color: "#111827",
                 }}
               >
-          
                 <li style={{ display: "flex", gap: 8 }}>
                   <span style={{ color: "#4f46e5" }}>●</span>
                   <span>
@@ -432,36 +347,65 @@ export default function MarketplaceHomePage() {
                   fontSize: 13,
                 }}
               >
-                <div>
-                  <div
-                    style={{
-                      fontSize: 20,
-                      fontWeight: 700,
-                      color: "#111827",
-                    }}
-                  >
-                    10k+
-                  </div>
-                  <div style={{ color: "#6b7280" }}>Clients servis</div>
-                </div>
-                <div>
-                  
-                  
-                </div>
-                <div>
-                  <div
-                    style={{
-                      fontSize: 20,
-                      fontWeight: 700,
-                      color: "#111827",
-                    }}
-                  >
-                    Mobile Money
-                  </div>
-                  <div style={{ color: "#6b7280" }}>PayGate, Flooz, TMoney</div>
-                </div>
               </div>
             </div>
+                {/* BLOC OPPORTUNITÉS GOSHOP (style Walmart) */}
+<section className="mk-op-section">
+  <div className="mk-op-inner">
+    {/* Image à gauche */}
+    <div className="mk-op-image">
+      {/* Mets ton image dans public/images et adapte le nom si besoin */}
+      <img
+        src="/images/opportunites-goshop.png"
+        alt="Vendeuse GoShop utilisant une tablette"
+      />
+    </div>
+
+    {/* Stats à droite */}
+    <div className="mk-op-content">
+      <h2>Profitez de tout le potentiel de GoShop</h2>
+
+      <div className="mk-op-metrics">
+        <div className="mk-op-item">
+          <div className="mk-op-value">10k+</div>
+          <p>
+            Clients et visiteurs touchés chaque mois via GoShop et nos vitrines
+            partenaires.*
+          </p>
+        </div>
+
+        <div className="mk-op-item">
+          <div className="mk-op-value">45%</div>
+          <p>
+            de croissance moyenne observée chez les vendeurs actifs sur
+            plusieurs mois.
+          </p>
+        </div>
+
+        <div className="mk-op-item">
+          <div className="mk-op-value">0</div>
+          <p>
+            frais d’inscription : vous payez principalement sur ce que vous
+            vendez, selon la formule choisie.
+          </p>
+        </div>
+
+        <div className="mk-op-item">
+          <div className="mk-op-value">4+</div>
+          <p>
+            villes et pays cibles en Afrique de l’Ouest, avec une extension
+            progressive sur la région.
+          </p>
+        </div>
+      </div>
+
+      <p className="mk-op-note">
+        *Chiffres indicatifs basés sur notre activité actuelle et projections
+        internes.
+      </p>
+    </div>
+  </div>
+</section>
 
             {/* Bannière gradient */}
             <div
@@ -686,7 +630,8 @@ export default function MarketplaceHomePage() {
                   <strong>Y a-t-il des frais pour devenir vendeur ?</strong>
                 </p>
                 <p style={{ color: "#4b5563", margin: 0 }}>
-                  Bien évidement que oui vous verez les détails un peu plus en bas.
+                  Bien évidement que oui vous verez les détails un peu plus en
+                  bas.
                 </p>
               </div>
 
@@ -712,253 +657,254 @@ export default function MarketplaceHomePage() {
               </div>
             </div>
           </section>
-{/* BLOCS DE SERVICES (style Walmart) */}
-<section id="services">
-  <h2
-    style={{
-      fontSize: 20,
-      fontWeight: 700,
-      color: "#111827",
-      marginBottom: 10,
-    }}
-  >
-    Des solutions pour développer votre activité
-  </h2>
 
-  <div
-    style={{
-      display: "flex",
-      flexWrap: "wrap",
-      gap: 16,
-    }}
-  >
-    {SERVICE_CARDS.map((card) => (
-      <div
-        key={card.id}
-        style={{
-          flex: "1 1 280px",
-          minWidth: 280,
-          maxWidth: 360,
-          background: "#ffffff",
-          borderRadius: 20,
-          overflow: "hidden",
-          boxShadow: "0 12px 30px rgba(15,23,42,0.10)",
-          border: "1px solid #e5e7eb",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        {/* Image en haut */}
-        <div
-          style={{
-            width: "100%",
-            height: 180,
-            backgroundColor: "#e5e7eb",
-            overflow: "hidden",
-          }}
-        >
-          <img
-            src={card.imageUrl}
-            alt={card.title}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              display: "block",
-            }}
-          />
-        </div>
+          {/* BLOCS DE SERVICES (style Walmart) */}
+          <section id="services">
+            <h2
+              style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: "#111827",
+                marginBottom: 10,
+              }}
+            >
+              Des solutions pour développer votre activité
+            </h2>
 
-        {/* Contenu texte */}
-        <div
-          style={{
-            padding: "14px 16px 16px",
-            display: "flex",
-            flexDirection: "column",
-            flex: 1,
-          }}
-        >
-          <h3
-            style={{
-              fontSize: 16,
-              fontWeight: 700,
-              color: "#1d4ed8",
-              marginBottom: 6,
-              lineHeight: 1.3,
-            }}
-          >
-            {card.title}
-          </h3>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 16,
+              }}
+            >
+              {SERVICE_CARDS.map((card) => (
+                <div
+                  key={card.id}
+                  style={{
+                    flex: "1 1 280px",
+                    minWidth: 280,
+                    maxWidth: 360,
+                    background: "#ffffff",
+                    borderRadius: 20,
+                    overflow: "hidden",
+                    boxShadow: "0 12px 30px rgba(15,23,42,0.10)",
+                    border: "1px solid #e5e7eb",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  {/* Image en haut */}
+                  <div
+                    style={{
+                      width: "100%",
+                      height: 180,
+                      backgroundColor: "#e5e7eb",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <img
+                      src={card.imageUrl}
+                      alt={card.title}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                    />
+                  </div>
 
-          <p
-            style={{
-              fontSize: 14,
-              color: "#4b5563",
-              marginBottom: 10,
-              flex: 1,
-            }}
-          >
-            {card.text}
-          </p>
+                  {/* Contenu texte */}
+                  <div
+                    style={{
+                      padding: "14px 16px 16px",
+                      display: "flex",
+                      flexDirection: "column",
+                      flex: 1,
+                    }}
+                  >
+                    <h3
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: "#1d4ed8",
+                        marginBottom: 6,
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      {card.title}
+                    </h3>
 
-          <button
-            type="button"
-            style={{
-              background: "transparent",
-              border: "none",
-              padding: 0,
-              marginTop: 4,
-              fontSize: 14,
-              fontWeight: 600,
-              color: "#1d4ed8",
-              cursor: "pointer",
-              alignSelf: "flex-start",
-            }}
-          >
-            {card.linkLabel}
-          </button>
-        </div>
-      </div>
-    ))}
-  </div>
-</section>
+                    <p
+                      style={{
+                        fontSize: 14,
+                        color: "#4b5563",
+                        marginBottom: 10,
+                        flex: 1,
+                      }}
+                    >
+                      {card.text}
+                    </p>
+
+                    <button
+                      type="button"
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        padding: 0,
+                        marginTop: 4,
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: "#1d4ed8",
+                        cursor: "pointer",
+                        alignSelf: "flex-start",
+                      }}
+                    >
+                      {card.linkLabel}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
 
           {/* NOS ABONNEMENTS */}
-<section id="abonnements">
-  <h2
-    style={{
-      fontSize: 20,
-      fontWeight: 700,
-      color: "#111827",
-      marginBottom: 8,
-    }}
-  >
-    Nos abonnements vendeurs
-  </h2>
+          <section id="abonnements">
+            <h2
+              style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: "#111827",
+                marginBottom: 8,
+              }}
+            >
+              Nos abonnements vendeurs
+            </h2>
 
-  <p
-    style={{
-      fontSize: 14,
-      color: "#4b5563",
-      marginBottom: 12,
-      maxWidth: 640,
-    }}
-  >
-    Choisissez la formule qui correspond le mieux à votre activité. Vous
-    pouvez démarrer avec un pack simple puis évoluer ensuite.
-  </p>
+            <p
+              style={{
+                fontSize: 14,
+                color: "#4b5563",
+                marginBottom: 12,
+                maxWidth: 640,
+              }}
+            >
+              Choisissez la formule qui correspond le mieux à votre activité.
+              Vous pouvez démarrer avec un pack simple puis évoluer ensuite.
+            </p>
 
-  <div
-    style={{
-      display: "flex",
-      flexWrap: "wrap",
-      gap: 16,
-    }}
-  >
-    {SUBSCRIPTIONS.map((plan) => (
-      <div
-        key={plan.id}
-        style={{
-          flex: "1 1 260px",
-          minWidth: 260,
-          maxWidth: 340,
-          borderRadius: 20,
-          background: "#ffffff",
-          border: "1px solid #e5e7eb",
-          boxShadow: "0 10px 25px rgba(15,23,42,0.06)",
-          padding: "16px 16px 18px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-        }}
-      >
-        {/* En-tête */}
-        <div>
-          <div
-            style={{
-              fontSize: 12,
-              color: "#4f46e5",
-              fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.12em",
-              marginBottom: 4,
-            }}
-          >
-            {plan.tag}
-          </div>
-          <h3
-            style={{
-              fontSize: 18,
-              fontWeight: 700,
-              color: "#111827",
-              marginBottom: 4,
-            }}
-          >
-            {plan.name}
-          </h3>
-          <div
-            style={{
-              fontSize: 14,
-              fontWeight: 600,
-              color: "#16a34a",
-              marginBottom: 6,
-            }}
-          >
-            {plan.price}
-          </div>
-          <p
-            style={{
-              fontSize: 13,
-              color: "#4b5563",
-              marginBottom: 8,
-            }}
-          >
-            {plan.description}
-          </p>
-        </div>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 16,
+              }}
+            >
+              {SUBSCRIPTIONS.map((plan) => (
+                <div
+                  key={plan.id}
+                  style={{
+                    flex: "1 1 260px",
+                    minWidth: 260,
+                    maxWidth: 340,
+                    borderRadius: 20,
+                    background: "#ffffff",
+                    border: "1px solid #e5e7eb",
+                    boxShadow: "0 10px 25px rgba(15,23,42,0.06)",
+                    padding: "16px 16px 18px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  {/* En-tête */}
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: "#4f46e5",
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.12em",
+                        marginBottom: 4,
+                      }}
+                    >
+                      {plan.tag}
+                    </div>
+                    <h3
+                      style={{
+                        fontSize: 18,
+                        fontWeight: 700,
+                        color: "#111827",
+                        marginBottom: 4,
+                      }}
+                    >
+                      {plan.name}
+                    </h3>
+                    <div
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: "#16a34a",
+                        marginBottom: 6,
+                      }}
+                    >
+                      {plan.price}
+                    </div>
+                    <p
+                      style={{
+                        fontSize: 13,
+                        color: "#4b5563",
+                        marginBottom: 8,
+                      }}
+                    >
+                      {plan.description}
+                    </p>
+                  </div>
 
-        {/* Liste des avantages */}
-        <ul
-          style={{
-            listStyle: "none",
-            padding: 0,
-            margin: "0 0 10px",
-            fontSize: 13,
-            color: "#111827",
-            display: "grid",
-            gap: 4,
-          }}
-        >
-          {plan.features.map((f, i) => (
-            <li key={i} style={{ display: "flex", gap: 6 }}>
-              <span style={{ color: "#16a34a" }}>✔</span>
-              <span>{f}</span>
-            </li>
-          ))}
-        </ul>
+                  {/* Liste des avantages */}
+                  <ul
+                    style={{
+                      listStyle: "none",
+                      padding: 0,
+                      margin: "0 0 10px",
+                      fontSize: 13,
+                      color: "#111827",
+                      display: "grid",
+                      gap: 4,
+                    }}
+                  >
+                    {plan.features.map((f, i) => (
+                      <li key={i} style={{ display: "flex", gap: 6 }}>
+                        <span style={{ color: "#16a34a" }}>✔</span>
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-        {/* Bouton */}
-        <div style={{ marginTop: "auto" }}>
-          <Link to="/inscription-vendeur" style={joinButtonStyle}>
-            Rejoindre avec ce pack
-          </Link>
-        </div>
-      </div>
-    ))}
-  </div>
+                  {/* Bouton */}
+                  <div style={{ marginTop: "auto" }}>
+                    <Link to="/inscription-vendeur" style={joinButtonStyle}>
+                      Rejoindre avec ce pack
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-  <p
-    style={{
-      fontSize: 12,
-      color: "#6b7280",
-      marginTop: 10,
-    }}
-  >
-    *Les conditions exactes (commissions, plafonds de produits, etc.) peuvent
-    être précisées dans votre contrat ou la page de tarification détaillée.
-  </p>
-</section>
-
+            <p
+              style={{
+                fontSize: 12,
+                color: "#6b7280",
+                marginTop: 10,
+              }}
+            >
+              *Les conditions exactes (commissions, plafonds de produits, etc.)
+              peuvent être précisées dans votre contrat ou la page de
+              tarification détaillée.
+            </p>
+          </section>
 
           {/* CTA BAS DE PAGE */}
           <div
@@ -986,6 +932,238 @@ export default function MarketplaceHomePage() {
           </footer>
         </main>
       </div>
+
+      <style>
+  {`
+    .mk-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .mk-header-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .mk-logo-block {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .mk-logo-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: linear-gradient(135deg,#16a34a 0%,#22c55e 40%,#4ade80 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .mk-logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .mk-logo-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .mk-logo-sub {
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .mk-nav {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      font-size: 14px;
+      color: #4b5563;
+    }
+
+    .mk-nav button {
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      color: #4b5563;
+      font-size: 14px;
+    }
+
+    .mk-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mk-link-login {
+      font-size: 13px;
+      color: #4b5563;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .mk-burger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      padding: 0;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .mk-burger span {
+      width: 16px;
+      height: 2px;
+      border-radius: 999px;
+      background: #111827;
+    }
+
+    @media (max-width: 768px) {
+      .mk-header-inner {
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .mk-logo-block {
+        flex: 1;
+      }
+
+      .mk-actions {
+        order: 3;
+        width: 100%;
+        justify-content: flex-start;
+        margin-top: 8px;
+        gap: 8px;
+      }
+
+      .mk-burger {
+        display: inline-flex;
+        order: 2;
+      }
+
+      .mk-nav {
+        order: 4;
+        width: 100%;
+        display: none;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .mk-nav.is-open {
+        display: flex;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .mk-nav {
+        display: flex;
+      }
+    }
+
+    /* ====== BLOC OPPORTUNITÉS GOSHOP ====== */
+    .mk-op-section {
+      background: #eff6ff;
+      border-radius: 24px;
+      padding: 24px 24px 26px;
+      margin-top: 16px;
+    }
+
+    .mk-op-inner {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .mk-op-image img {
+      width: 100%;
+      max-width: 260px;
+      height: auto;
+      display: block;
+      border-radius: 999px;
+    }
+
+    .mk-op-content h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 14px;
+    }
+
+    .mk-op-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 40px;
+    }
+
+    .mk-op-item {
+      border-left: 4px solid #fbbf24;
+      padding-left: 12px;
+    }
+
+    .mk-op-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1d4ed8;
+      margin-bottom: 4px;
+    }
+
+    .mk-op-item p {
+      margin: 0;
+      font-size: 14px;
+      color: #4b5563;
+    }
+
+    .mk-op-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    @media (max-width: 768px) {
+      .mk-op-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .mk-op-image img {
+        max-width: 220px;
+      }
+
+      .mk-op-metrics {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+  `}
+</style>
+
     </div>
   );
 }
