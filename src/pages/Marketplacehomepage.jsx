@@ -1,6 +1,8 @@
 // src/pages/MarketplaceHomePage.jsx
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import HeroVideoBanner from "../components/HeroVideoBanner";
+
 
 const SERVICE_CARDS = [
   {
@@ -216,6 +218,7 @@ export default function MarketplaceHomePage() {
               Inscris toi en tant que vendeur
             </span>
           </div>
+              <HeroVideoBanner />
 
           {/* HERO + bannières (vertical) */}
           <section
